@@ -1,6 +1,7 @@
 defmodule FriendsApp.CLI.Menu.Choice do
   alias Mix.Shell.IO, as: Shell
   alias FriendsApp.CLI.Menu.Items
+  alias FriendsApp.CLI.Controller
 
   @first_item_char 1
 
@@ -20,6 +21,7 @@ defmodule FriendsApp.CLI.Menu.Choice do
     |> find_menu_item_by_index.()
     |> confirmation_step()
     |> confirmation_of()
+    |> Controller.process()
   end
 
   defp display(options) do
@@ -45,12 +47,12 @@ defmodule FriendsApp.CLI.Menu.Choice do
     end
   end
 
-  defp confirmation_of(label) do
+  defp confirmation_of(item) do
     Shell.cmd("clear")
-    Shell.info("You chose #{label}")
+    Shell.info("You chose #{item.label}")
 
     if Shell.yes?("Are you sure?") do
-      Shell.info("... #{label} ...")
+      item
     else
       start()
     end
@@ -59,7 +61,7 @@ defmodule FriendsApp.CLI.Menu.Choice do
   defp confirmation_step(chosen_menu_item) do
     case chosen_menu_item do
       :error -> handle("Invalid option")
-      _ -> chosen_menu_item.label
+      _ -> chosen_menu_item
     end
   end
 
