@@ -7,7 +7,7 @@ defmodule FriendsApp.Db.CSV do
   def perform(item) do
     case item do
       %Menu{id: :create, label: _} -> create()
-      %Menu{id: :read, label: label} -> Shell.info(label)
+      %Menu{id: :read, label: _} -> read()
       %Menu{id: :update, label: label} -> Shell.info(label)
       %Menu{id: :delete, label: label} -> Shell.info(label)
     end
@@ -21,6 +21,17 @@ defmodule FriendsApp.Db.CSV do
     |> wrap()
     |> Parser.dump_to_iodata()
     |> save_csv()
+  end
+
+  def read do
+    File.read!("#{File.cwd!()}/friends.csv")
+    |> Parser.parse_string(headers: false)
+    |> Enum.map(
+      fn [name, email, phone] ->
+        %Friend{name: name, email: email, phone: phone}
+      end
+    )
+    |> Scribe.console
   end
 
   defp collect_data do

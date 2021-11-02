@@ -1,9 +1,5 @@
 defmodule FriendsApp do
-  def hello do
-    :world
-  end
-
-  def env do
-    Mix.env()
+  def init do
+    FriendsApp.CLI.Main.start_app()
   end
 end
