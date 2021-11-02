@@ -17,21 +17,16 @@ defmodule FriendsApp.Db.CSV do
 
   defp create do
     collect_data()
-    |> Keyword.values()
-    |> wrap()
+    |> to_csv()
     |> Parser.dump_to_iodata()
-    |> save_csv()
+    |> save_csv([:append])
   end
 
   def read do
-    File.read!("#{File.cwd!()}/friends.csv")
+    read_db_file()
     |> Parser.parse_string(headers: false)
-    |> Enum.map(
-      fn [name, email, phone] ->
-        %Friend{name: name, email: email, phone: phone}
-      end
-    )
-    |> Scribe.console
+    |> Enum.map(&to_friend(&1))
+    |> Scribe.console()
   end
 
   defp collect_data do
@@ -45,15 +40,27 @@ defmodule FriendsApp.Db.CSV do
     ]
   end
 
-  defp save_csv(data) do
-    File.write!("#{File.cwd!()}/friends.csv", data, [:append])
+  defp read_db_file do
+    Application.fetch_env!(:friends_app, :db_file_path)
+    |> File.read!()
+  end
+
+  defp to_friend([name, email, phone]) do
+    %Friend{name: name, email: email, phone: phone}
+  end
+
+  defp to_csv(keyword_list) do
+    keyword_list
+    |> Keyword.values()
+    |> Kernel.then(fn list -> [list] end)
+  end
+
+  defp save_csv(data, mode \\ []) do
+    Application.fetch_env!(:friends_app, :db_file_path)
+    |> File.write!(data, mode)
   end
 
   defp prompt(message) do
     Shell.prompt(message) |> String.trim()
-  end
-
-  defp wrap(list) do
-    [list]
   end
 end
