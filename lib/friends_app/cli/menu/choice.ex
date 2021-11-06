@@ -51,10 +51,9 @@ defmodule FriendsApp.CLI.Menu.Choice do
     Shell.cmd("clear")
     Shell.info("You chose #{item.label}")
 
-    if Shell.yes?("Are you sure?") do
-      item
-    else
-      start()
+    case Shell.yes?("Are you sure?") do
+      true -> item
+      false -> start()
     end
   end
 
