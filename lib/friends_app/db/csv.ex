@@ -8,7 +8,7 @@ defmodule FriendsApp.Db.CSV do
     case item do
       %Menu{id: :create, label: _} -> create()
       %Menu{id: :read, label: _} -> read()
-      %Menu{id: :update, label: label} -> Shell.info(label)
+      %Menu{id: :update, label: _} -> update()
       %Menu{id: :delete, label: _} -> delete()
     end
 
@@ -18,7 +18,6 @@ defmodule FriendsApp.Db.CSV do
   defp create do
     collect_data()
     |> to_csv()
-    |> IO.inspect()
     |> save_csv([:append])
   end
 
@@ -27,13 +26,23 @@ defmodule FriendsApp.Db.CSV do
     |> Scribe.console()
   end
 
+  defp update do
+    Shell.cmd("clear")
+
+    prompt("Enter friend email to be updated:")
+    |> find_friend_by()
+    |> check_presence()
+    |> show_and_confirm("Friend to be updated:")
+    |> update_and_save()
+  end
+
   defp delete do
     Shell.cmd("clear")
 
     prompt("Enter friend email to be deleted:")
     |> find_friend_by()
     |> check_presence()
-    |> show_and_confirm()
+    |> show_and_confirm("Friend to be deleted:")
     |> delete_and_save()
   end
 
@@ -42,6 +51,22 @@ defmodule FriendsApp.Db.CSV do
     |> File.read!()
     |> Parser.parse_string(headers: false)
     |> Enum.map(&to_friend(&1))
+  end
+
+  defp update_and_save(friend) do
+    case friend do
+      %Friend{name: _, email: _, phone: _} ->
+        database()
+        |> destroy(friend)
+        |> to_csv()
+        |> save_csv()
+
+        create()
+
+      _ ->
+        Shell.info("Ok, do not update friend...")
+        Shell.prompt("Press enter to continue")
+    end
   end
 
   defp delete_and_save(friend) do
@@ -84,9 +109,9 @@ defmodule FriendsApp.Db.CSV do
     end
   end
 
-  defp show_and_confirm(friend) do
+  defp show_and_confirm(friend, message) do
     Shell.cmd("clear")
-    Shell.info("Friend to be deleted:")
+    Shell.info(message)
 
     Scribe.print(friend)
 
