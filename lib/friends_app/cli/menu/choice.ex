@@ -1,7 +1,6 @@
 defmodule FriendsApp.CLI.Menu.Choice do
   alias Mix.Shell.IO, as: Shell
   alias FriendsApp.CLI.Menu.Items
-  alias FriendsApp.CLI.Controller
 
   @first_item_char 1
 
@@ -21,7 +20,7 @@ defmodule FriendsApp.CLI.Menu.Choice do
     |> find_menu_item_by_index.()
     |> confirmation_step()
     |> confirmation_of()
-    |> Controller.process()
+    |> FriendsApp.CLI.Controller.process()
   end
 
   defp display(options) do
